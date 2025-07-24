@@ -1,13 +1,15 @@
+import dotenv from "dotenv";
+dotenv.config();
 import { json } from "express";
 import UserModel from "../Models/user.model.js";
 import bcryptjs from "bcryptjs"
 import sendEmail from "../config/sendEmail.js";
-import dotenv from "dotenv";
-dotenv.config();
+
 
 import verifyEmailTemplate from "../utils/verifyEmailTemplate.js";
 import generatedAccessToken from "../utils/generateAccessToken.js";
 import generatedRefreshToken from "../utils/generateRefreshToken.js";
+import uploadImageCloudinary from "../utils/uploadImageCloudinary.js";
 //registering controller
 export async function registerUserController(req,res) {
     try {
@@ -218,3 +220,42 @@ export async function logoutController(req,res){
         })
     }
 }
+
+
+// uploading image (Avatar of user ) controller
+export async function uploadAvatarController(req, res) {
+  try {
+    const userId = req.userId//coming from auth.js middleware only login user
+    const image = req.file;// coming from multer middleware
+
+
+
+    if (!image) {
+      return res.status(400).json({ message: "No file uploaded", success: false });
+    }
+
+    const upload = await uploadImageCloudinary(image);
+
+    const updateUser = UserModel.findByIdAndUpdate(userId,{
+        avatar : upload.url
+    })
+
+    return res.status(200).json({
+      message: "File uploaded successfully",
+      data: {
+        _id:userId,
+         avatar : upload.url
+      },
+      success: true,
+    });
+
+
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message || "Server error",
+      success: false,
+      error: true,
+    });
+  }
+}
+
