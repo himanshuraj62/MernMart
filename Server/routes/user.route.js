@@ -8,7 +8,8 @@ import {
   updateUserController, // ✅ this must match exactly
   forgotPasswordController,
   verifyOtp,
-  resetPassword
+  resetPassword,
+  refreshToken
 } from "../Controllers/user.controller.js";
 
 
@@ -26,4 +27,6 @@ userRouter.put('/update-user',auth, updateUserController)
 userRouter.put('/forgot-password',forgotPasswordController)
 userRouter.put('/verify-otp',verifyOtp)
 userRouter.put('/reset-password' , resetPassword)
+userRouter.post('/refresh-token', refreshToken)
+
 export default userRouter

@@ -4,7 +4,7 @@ import { json } from "express";
 import UserModel from "../Models/user.model.js";
 import bcryptjs from "bcryptjs"
 import sendEmail from "../config/sendEmail.js";
-
+import jwt from "jsonwebtoken";
 import forgotPasswordTemplate from "../utils/forgotPasswordTemplate.js";
 import verifyEmailTemplate from "../utils/verifyEmailTemplate.js";
 import generatedAccessToken from "../utils/generateAccessToken.js";
@@ -454,6 +454,51 @@ export async function resetPassword(req,res) {
 
   } catch (error) {
       return res.status(500).json({
+      message: error.message || "Internal Server Error",
+      success: false,
+      error: true,
+    });
+  }
+}
+// refresh token controller
+export async function refreshToken(req,res) {
+  try {
+    const refreshToken = req.cookies.refreshToken || req?.header?.authorization?.split(" ")[1];
+    if(!refreshToken){
+      return res.status(401).json({
+          message:"Invalid token",
+          success: false,
+          error: true,
+      })
+    }
+    const VerifyToken = await jwt.verify(refreshToken,process.env.SECRET_KEY_REFRESH_TOKEN)
+    if(!VerifyToken){
+       return res.status(401).json({
+          message:"token is expired",
+          success: false,
+          error: true,
+      })
+    }
+  
+    const userId = VerifyToken?._id;
+    const newAccessToken = await generatedAccessToken(userId);
+
+      const cookiesOption = {
+        httpOnly:true, // Cannot be accessed via JS in the browser (prevents XSS)
+        secure : true, // Only sent over HTTPS
+        sameSite:"None"  // Allows cookies to be sent across domains (important for frontend-backend on different origins)
+    }
+    res.cookie("accessToken",newAccessToken,cookiesOption)
+    return res.json({
+      message:"new access token generated",
+      success:true,
+      error:false,
+      data:{
+        accessToken:newAccessToken
+      }
+    })
+  } catch (error) {
+     return res.status(500).json({
       message: error.message || "Internal Server Error",
       success: false,
       error: true,
