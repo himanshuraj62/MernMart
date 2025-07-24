@@ -1,5 +1,14 @@
 import { Router } from "express";
-import {registerUserController,verifyEmailController,loginController, logoutController, uploadAvatarController} from "../Controllers/user.controller.js" 
+import {
+  registerUserController,
+  verifyEmailController,
+  loginController,
+  logoutController,
+  uploadAvatarController,
+  updateUserController // ✅ this must match exactly
+} from "../Controllers/user.controller.js";
+
+
 import auth from "../middleware/auth.js";
 import upload from "../middleware/multer.js";
 
@@ -10,4 +19,5 @@ userRouter.post('/verify-email' , verifyEmailController);
 userRouter.post('/login' , loginController)
 userRouter.get('/logout' , auth , logoutController)
 userRouter.put('/upload-avatar',auth,upload.single("avatar"),uploadAvatarController)
+userRouter.put('/update-user',auth, updateUserController)
 export default userRouter

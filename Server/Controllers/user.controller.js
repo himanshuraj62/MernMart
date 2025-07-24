@@ -236,10 +236,11 @@ export async function uploadAvatarController(req, res) {
 
     const upload = await uploadImageCloudinary(image);
 
-    const updateUser = UserModel.findByIdAndUpdate(userId,{
-        avatar : upload.url
-    })
-
+const updateUser = await UserModel.findByIdAndUpdate(
+      userId,
+      { avatar: upload.url },
+      { new: true } // returns updated document (optional)
+    );
     return res.status(200).json({
       message: "File uploaded successfully",
       data: {
@@ -259,3 +260,36 @@ export async function uploadAvatarController(req, res) {
   }
 }
 
+export async function updateUserController(req,res) {
+    try {
+      const userId = req.userId //coming from auth.js middleware only login user
+      const{name , email , mobile,password } = req.body
+      let hashPassword = ""
+      if(password){
+        const salt = await bcryptjs.genSalt(10)
+        hashPassword = await bcryptjs.hash(password , salt);
+      }
+
+      const updateUser = await UserModel.findByIdAndUpdate(userId,{
+        ...(name && {name:name}),
+        ...(email && {email:email}),
+        ...(mobile && {mobile:mobile}),
+        ...(password && {password:hashPassword})
+      })
+
+      return res.status(200).json({
+        message: "user details updated successfully",
+        success: true,
+        error: false,
+        data: updateUser
+        
+      })
+
+    } catch (error) {
+        return res.status(500).json({
+      message: error.message || "Server error",
+      success: false,
+      error: true,
+    }); 
+    }
+}
