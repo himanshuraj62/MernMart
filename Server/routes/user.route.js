@@ -6,7 +6,9 @@ import {
   logoutController,
   uploadAvatarController,
   updateUserController, // ✅ this must match exactly
-  forgotPasswordController
+  forgotPasswordController,
+  verifyOtp,
+  resetPassword
 } from "../Controllers/user.controller.js";
 
 
@@ -22,4 +24,6 @@ userRouter.get('/logout' , auth , logoutController)
 userRouter.put('/upload-avatar',auth,upload.single("avatar"),uploadAvatarController)
 userRouter.put('/update-user',auth, updateUserController)
 userRouter.put('/forgot-password',forgotPasswordController)
+userRouter.put('/verify-otp',verifyOtp)
+userRouter.put('/reset-password' , resetPassword)
 export default userRouter

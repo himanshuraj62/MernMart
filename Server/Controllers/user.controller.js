@@ -340,8 +340,120 @@ export async function forgotPasswordController(req, res) {
     });
 
   } catch (error) {
-    console.error("Forgot Password Error:", error);
+   
     return res.status(500).json({
+      message: error.message || "Internal Server Error",
+      success: false,
+      error: true,
+    });
+  }
+}
+//verify otp for password update
+export async function verifyOtp(req,res) {
+    
+    try {
+      const { email , otp} = req.body;
+      //checking if user has enter otp & email or not 
+      if(!email || !otp){
+        return res.status(400).json({
+        message: "Email and aotp is not provided.",
+        success: false,
+        error: true,
+      })
+      }
+
+    // 1. Check if user exists
+    const user = await UserModel.findOne({ email });
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found with this email.",
+        success: false,
+        error: true,
+      });
+    }
+   // checking if otp is not expired
+    const CurrentTime = new Date().toISOString;
+
+    if(user.forgot_password_expiry < CurrentTime){
+      return res.status(400).json({
+        message: "OTP is expired",
+        success: false,
+        error: true,
+      });
+    }
+      // checking otp is valid or not
+    if(otp !== user.forgot_password_otp){
+      return res.status(400).json({
+        message: "OTP is not valid",
+        success: false,
+        error: true,
+      });
+    }
+
+    // if otp is valid and otp is not expired then,
+    return res.json({
+      message:"Otp verified successfully",
+      error:false,
+      success:true
+    })
+
+    } catch (error) {
+       return res.status(500).json({
+      message: error.message || "Internal Server Error",
+      success: false,
+      error: true,
+    });
+    }
+}
+
+// reset/update the password Controller
+export async function resetPassword(req,res) {
+  try {
+
+    const {email , newPassword , confirmPassword} = req.body;
+    // checking if any of field is null or not provided by the user
+    if(!email || !newPassword || !confirmPassword){
+      return res.status(400).json({
+      message: "Provide required field",
+      success: false,
+      error: true,
+    });
+    }
+    //checking if user exist in database
+    const user = await UserModel.findOne({email})
+    if(!user){
+       return res.status(400).json({
+      message: "Email is not available",
+      success: false,
+      error: true,
+    });
+    }
+    //comparing both password are they same?
+    if(newPassword !== confirmPassword ){
+       return res.status(400).json({
+      message: "Both password are not same",
+      success: false,
+      error: true,
+    });
+    }   
+    
+    //convert the normal pass to hashedpass 
+        const salt = await bcryptjs.genSalt(10)
+        const hashPassword = await bcryptjs.hash(newPassword , salt);
+
+    //updating the password 
+   await UserModel.findByIdAndUpdate(user._id,{
+      password : hashPassword
+    })
+
+    return res.status(200).json({
+      message:"password updated succesfully",
+      success: true,
+      error: false,
+    })
+
+  } catch (error) {
+      return res.status(500).json({
       message: error.message || "Internal Server Error",
       success: false,
       error: true,
