@@ -5,11 +5,12 @@ import UserModel from "../Models/user.model.js";
 import bcryptjs from "bcryptjs"
 import sendEmail from "../config/sendEmail.js";
 
-
+import forgotPasswordTemplate from "../utils/forgotPasswordTemplate.js";
 import verifyEmailTemplate from "../utils/verifyEmailTemplate.js";
 import generatedAccessToken from "../utils/generateAccessToken.js";
 import generatedRefreshToken from "../utils/generateRefreshToken.js";
 import uploadImageCloudinary from "../utils/uploadImageCloudinary.js";
+import generateOtp from "../utils/generateOtp.js";
 //registering controller
 export async function registerUserController(req,res) {
     try {
@@ -236,10 +237,10 @@ export async function uploadAvatarController(req, res) {
 
     const upload = await uploadImageCloudinary(image);
 
-const updateUser = await UserModel.findByIdAndUpdate(
+    const updateUser = await UserModel.findByIdAndUpdate(
       userId,
       { avatar: upload.url },
-      { new: true } // returns updated document (optional)
+      { new: true } // returns updated document 
     );
     return res.status(200).json({
       message: "File uploaded successfully",
@@ -259,7 +260,7 @@ const updateUser = await UserModel.findByIdAndUpdate(
     });
   }
 }
-
+// updating user detail controller
 export async function updateUserController(req,res) {
     try {
       const userId = req.userId //coming from auth.js middleware only login user
@@ -292,4 +293,58 @@ export async function updateUserController(req,res) {
       error: true,
     }); 
     }
+}
+
+
+//forgot password controller
+export async function forgotPasswordController(req, res) {
+  try {
+    const { email } = req.body;
+
+    // 1. Check if user exists
+    const user = await UserModel.findOne({ email });
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found with this email.",
+        success: false,
+        error: true,
+      });
+    }
+
+    // 2. Generate OTP and expiry
+    const otp = await generateOtp(); // should return a number or string, not a Promise!
+    const expireTime = new Date(Date.now() + 60 * 60 * 1000); // 1 hour from now
+
+    // 3. Update user's OTP fields
+    await UserModel.findByIdAndUpdate(user._id, {
+      forgot_password_otp: otp,
+      forgot_password_expiry: expireTime.toISOString(),
+    });
+
+
+    // 4. Send email via Resend
+    await sendEmail({
+      sendTo: email,
+      subject: "Forgot Password - MernMart",
+      html: forgotPasswordTemplate({
+        name: user.name,
+        otp: otp,
+      }),
+    });
+
+    // 5. Respond to frontend
+    return res.status(200).json({
+      message: "OTP sent to your email. Please check.",
+      success: true,
+      error: false,
+    });
+
+  } catch (error) {
+    console.error("Forgot Password Error:", error);
+    return res.status(500).json({
+      message: error.message || "Internal Server Error",
+      success: false,
+      error: true,
+    });
+  }
 }
