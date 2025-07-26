@@ -32,7 +32,7 @@ app.use("/api/user" , userRouter)
 
 connectDB().then(()=>{
     app.listen(PORT , ()=>{
-    console.log("Server is running on "+PORT)
+    console.log("Server is running on "+ PORT)
 })
 });
 
