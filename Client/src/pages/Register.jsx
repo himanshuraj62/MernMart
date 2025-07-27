@@ -1,52 +1,21 @@
-// import React, { useState } from 'react'
-
-// const Register = () => {
-//     const [data, setData] = useState({
-//         name: "",
-//         email: "",
-//         password: "",
-//         confirmPassword: ""
-//     })
-//     const handleChange = (e) => {
-//         const { name, value } = e.target;
-//         setData((previous)=>{
-//             return {...previous,
-//                 [name] : value
-//             }
-//         })
-//     }
-//     console.log(data)
-//     return (
-//         <section className=" w-full container mx-auto px-4">
-//             <div className='bg-white rounded p-4 my-4 mx-auto w-full max-w-lg'>
-//                 <p>Welcome to MernMart</p>
-
-//                 <form action="" className='grid gap-2 mt-6'>
-//                     <div className='grid'>
-//                         <label htmlFor="name">Name : </label>
-//                         <input id='name' type="text" autoFocus className='bg-blue-50 p-2' name='name' value={data.name} onChange={handleChange} />
-
-//                     </div>
-//                 </form>
-
-//             </div>
-//         </section>
-//     )
-// }
-
-// export default Register
-
 
 
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
+import AxiosToastError from '../utils/AxiosToastError.jsx';
+import SummaryApi from '../common/SummaryApi.jsx';
+import Axios from '../utils/Axios.jsx';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
+  const navigate = useNavigate();
   const [data, setData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: ""
   });
+  const validateValue = Object.values(data).every(el => el);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,15 +25,55 @@ const Register = () => {
     }));
   };
 
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (data.password !== data.confirmPassword) {
+    toast.error("Password and Confirm Password must be same");
+    return; // prevent further execution
+  }
+
+  try {
+    const response = await Axios({
+      ...SummaryApi.register,
+      data: data
+    });
+
+    if (response.data.error) {
+      toast.error(response.data.message);
+    }
+
+    if (response.data.success) {
+      toast.success(response.data.message);
+
+      // Reset the form fields
+      setData({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: ""
+      });
+
+     
+      navigate("/login");
+    }
+
+  } catch (error) {
+    AxiosToastError(error);
+  }
+};
+
+
+
   return (
     <section className="bg-green-50 w-full min-h-0 pt-10 pb-6 px-4 flex justify-center">
       <div className="w-full max-w-sm bg-white p-6 rounded-xl shadow-md border border-green-200">
-        
+
         {/* Welcome Heading */}
         <h3 className="text-center text-green-600 text-sm mb-1">Welcome to MernMart</h3>
         <h2 className="text-xl font-semibold text-center text-yellow-500 mb-5">Create Account</h2>
 
-        <form className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-3">
           {/* Name Field */}
           <div>
             <label className="block text-sm font-medium text-green-700">Full Name</label>
@@ -119,8 +128,10 @@ const Register = () => {
 
           {/* Register Button */}
           <button
+            disabled={!validateValue}
+            className={`w-full text-green-900 py-2 rounded-md text-sm transition duration-300 font-medium 
+              ${validateValue ? 'bg-yellow-400 hover:bg-yellow-500' : 'bg-gray-400 cursor-not-allowed'}`}
             type="submit"
-            className="w-full bg-yellow-400 text-green-900 py-2 rounded-md text-sm hover:bg-yellow-500 transition duration-300 font-medium"
           >
             Register
           </button>
@@ -137,3 +148,4 @@ const Register = () => {
 };
 
 export default Register;
+
