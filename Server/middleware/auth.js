@@ -5,7 +5,7 @@ const auth = async (req, res, next) => {
 // Either from a cookie named accessToken
 // Or from the Authorization header (if sent like Bearer token)
 // If both are missing, token will be undefined.
-        const token = await req.cookies.accessToken || req?.header?.authorization?.split(" ")[1] // ["Bearer","token"]
+        const token = await req.cookies.accessToken || req?.headers?.authorization?.split(" ")[1] // ["Bearer","token"]
  
         if (!token) {
             return res.status(401).json({

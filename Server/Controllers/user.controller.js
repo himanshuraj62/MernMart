@@ -157,6 +157,11 @@ export async function loginController(req,res){
       //Generate JWT access & refresh tokens
     const accessToken = await generatedAccessToken(user._id)
     const refreshToken    = await generatedRefreshToken(user._id) 
+
+      const updateUser = await UserModel.findByIdAndUpdate(user?._id,{
+            last_login_date : new Date()
+        })
+
     const cookiesOption = {
         httpOnly:true, // Cannot be accessed via JS in the browser (prevents XSS)
         secure : true, // Only sent over HTTPS
@@ -207,8 +212,8 @@ export async function logoutController(req,res){
 
        return res.json({
             message : "logout suucessfully",
-            error : true, 
-            success : false
+            error : false, 
+            success : true
        })
 
 
@@ -389,7 +394,10 @@ export async function verifyOtp(req,res) {
         error: true,
       });
     }
-
+      const updateUser = await UserModel.findByIdAndUpdate(user?._id,{
+            forgot_password_otp : "",
+            forgot_password_expiry : ""
+        })
     // if otp is valid and otp is not expired then,
     return res.json({
       message:"Otp verified successfully",
@@ -463,7 +471,7 @@ export async function resetPassword(req,res) {
 // refresh token controller
 export async function refreshToken(req,res) {
   try {
-    const refreshToken = req.cookies.refreshToken || req?.header?.authorization?.split(" ")[1];
+    const refreshToken = req.cookies.refreshToken || req?.headers?.authorization?.split(" ")[1];
     if(!refreshToken){
       return res.status(401).json({
           message:"Invalid token",
@@ -504,4 +512,27 @@ export async function refreshToken(req,res) {
       error: true,
     });
   }
+}
+//get login user details
+export async function userDetails(request,response){
+    try {
+        const userId  = request.userId
+
+        console.log(userId)
+
+        const user = await UserModel.findById(userId).select('-password -refresh_token')
+
+        return response.json({
+            message : 'user details',
+            data : user,
+            error : false,
+            success : true
+        })
+    } catch (error) {
+        return response.status(500).json({
+            message : "Something is wrong",
+            error : true,
+            success : false
+        })
+    }
 }

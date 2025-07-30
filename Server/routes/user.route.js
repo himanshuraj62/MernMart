@@ -5,11 +5,12 @@ import {
   loginController,
   logoutController,
   uploadAvatarController,
-  updateUserController, // ✅ this must match exactly
+  updateUserController, 
   forgotPasswordController,
   verifyOtp,
   resetPassword,
-  refreshToken
+  refreshToken,
+  userDetails
 } from "../Controllers/user.controller.js";
 
 
@@ -28,5 +29,6 @@ userRouter.put('/forgot-password',forgotPasswordController)
 userRouter.put('/verify-otp',verifyOtp)
 userRouter.put('/reset-password' , resetPassword)
 userRouter.post('/refresh-token', refreshToken)
+userRouter.get('/user-details',auth,userDetails)
 
 export default userRouter
