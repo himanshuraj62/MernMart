@@ -1,20 +1,17 @@
+
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import AxiosToastError from '../utils/AxiosToastError.jsx';
 import SummaryApi from '../common/SummaryApi.jsx';
 import Axios from '../utils/Axios.jsx';
-import { useNavigate, Link } from 'react-router-dom';
-import fetchUserDetails from '../utils/fetchUserDetails.js';
-import { useDispatch } from 'react-redux';
-import { setUserDetails } from '../store/userSlice.js';
+import { useNavigate ,Link } from 'react-router-dom';
 
-const Login = () => {
+const ForgotPassword = () => {
   const navigate = useNavigate();
   const [data, setData] = useState({
     email: "",
-    password: "",
   });
-  const dispatch = useDispatch();
+
   const validateValue = Object.values(data).every(el => el);
 
   const handleChange = (e) => {
@@ -30,7 +27,7 @@ const Login = () => {
 
     try {
       const response = await Axios({
-        ...SummaryApi.login,
+        ...SummaryApi.forgot_password,
         data: data
       });
 
@@ -40,12 +37,10 @@ const Login = () => {
 
       if (response.data.success) {
         toast.success(response.data.message);
-        localStorage.setItem('accessToken', response.data.accessToken)
-        localStorage.setItem('refreshToken', response.data.refreshToken)
-        const userDetails =await fetchUserDetails();
-        dispatch(setUserDetails(userDetails.data))
-        setData({ email: "", password: "" });
-        navigate("/");
+        setData({ email: "" });
+        navigate("/verify-otp" ,{
+          state:data
+        });
       }
 
     } catch (error) {
@@ -58,7 +53,7 @@ const Login = () => {
 
       <div className="w-full max-w-sm bg-white p-5 rounded-xl shadow-md border border-green-200">
         <h3 className="text-center text-green-600 text-sm mb-1">Welcome to MernMart</h3>
-        <h2 className="text-xl font-semibold text-center text-yellow-500 mb-5">Login</h2>
+        <h2 className="text-xl font-semibold text-center text-yellow-500 mb-5">Forgot Password</h2>
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
@@ -73,24 +68,8 @@ const Login = () => {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-green-700">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={data.password}
-              onChange={handleChange}
-              placeholder="Enter your password"
-              className="mt-1 w-full px-3 py-1.5 border border-green-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-            />
-          </div>
-
-          {/*forgot-password api */}
-          <div className="text-right mt-1">
-            <Link to={"/forgot-password"} className="text-xs text-blue-600 hover:underline">
-              Forgot Password?
-            </Link>
-          </div>
+        
+        
 
           <button
             disabled={!validateValue}
@@ -98,18 +77,19 @@ const Login = () => {
               ${validateValue ? 'bg-yellow-400 hover:bg-yellow-500' : 'bg-gray-400 cursor-not-allowed'}`}
             type="submit"
           >
-            Login
+            Send OTP
           </button>
         </form>
 
         <p className="mt-4 text-center text-sm text-gray-600">
-          Don’t have an account?{" "}
-          <a href="/register" className="text-green-700 hover:underline">Register</a>
+          Already have an account?{" "}
+          <a href="/register" className="text-green-700 hover:underline">Login</a>
         </p>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default ForgotPassword;
+
 
