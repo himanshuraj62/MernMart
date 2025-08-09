@@ -7,3 +7,4 @@ const Divider = () => {
 }
 
 export default Divider
+//DIVIDER COMPONENT

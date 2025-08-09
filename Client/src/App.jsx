@@ -7,28 +7,91 @@ import fetchUserDetails from './utils/fetchUserDetails';
 import { useEffect } from 'react';
 import { setUserDetails } from './store/userSlice';
 import { useDispatch } from 'react-redux';
+import Axios from './utils/Axios';
+import SummaryApi from './common/SummaryApi';
+import { setAllCategory, setAllSubCategory, setLoadingCategory } from './store/productSlice';
+import CartMobileLink from "./Components/CartMobile"
+import GlobalProvider from './provider/GlobalProvider';
 function App() {
- const dispatch =  useDispatch();
-  const fetchUser = async()=>{
-      const userData = await fetchUserDetails()
-      dispatch(setUserDetails(userData.data))
+  const dispatch = useDispatch();
+  const fetchUser = async () => {
+    const userData = await fetchUserDetails()
+    dispatch(setUserDetails(userData.data))
   }
- useEffect(()=>{
+
+  const fetchCategory = async () => {
+    try {
+      dispatch(setLoadingCategory(true))
+      const response = await Axios({
+        ...SummaryApi.getCategory
+      })
+      const { data: responseData } = response
+
+      if (responseData.success) {
+
+        dispatch(setAllCategory(responseData.data))
+      }
+    } catch (error) {
+
+    } finally {
+      dispatch(setLoadingCategory(false))
+    }
+  }
+  const fetchSubCategory = async () => {
+    try {
+      //  dispatch(setLoadingCategory(true))
+      const response = await Axios({
+        ...SummaryApi.getSubCategory
+      })
+      const { data: responseData } = response
+
+      if (responseData.success) {
+
+        dispatch(setAllSubCategory(responseData.data))
+      }
+    } catch (error) {
+
+    } finally {
+      // dispatch(setLoadingCategory(false))
+    }
+  }
+
+  // const fetchCartItem = async ()=> {
+  //   try {
+  //      const response = await Axios({
+  //           ...SummaryApi.getCartItem
+  //       })
+  //       const { data : responseData } = response
+  //       if(responseData.success){
+  //         console.log(responseData)
+  //       dispatch(handleAddItemCart(responseData.data))
+
+  //       }
+  //   } catch (error) {
+
+  //   }
+  // }
+  useEffect(() => {
     fetchUser()
-    // fetchCategory()
-    // fetchSubCategory()
+    fetchCategory()
+    fetchSubCategory()
     // fetchCartItem()
-  },[])
+  }, [])
   return (
-    <>
+
+    <GlobalProvider>
       <Header />
       <main className='min-h-[75vh]' >
         <Outlet />
       </main>
       <Footer />
       <Toaster />
-    </>
-  )
+      
+            <CartMobileLink/>
+      
+      </GlobalProvider>
+
+      )
 }
 
-export default App
+      export default App

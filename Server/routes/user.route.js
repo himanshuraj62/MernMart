@@ -31,4 +31,5 @@ userRouter.put('/reset-password' , resetPassword)
 userRouter.post('/refresh-token', refreshToken)
 userRouter.get('/user-details',auth,userDetails)
 
+
 export default userRouter

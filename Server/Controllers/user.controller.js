@@ -211,7 +211,7 @@ export async function logoutController(req,res){
         })
 
        return res.json({
-            message : "logout suucessfully",
+            message : "logout successfully",
             error : false, 
             success : true
        })
@@ -284,7 +284,7 @@ export async function updateUserController(req,res) {
       })
 
       return res.status(200).json({
-        message: "user details updated successfully",
+        message: "Updated successfully",
         success: true,
         error: false,
         data: updateUser
@@ -361,7 +361,7 @@ export async function verifyOtp(req,res) {
       //checking if user has enter otp & email or not 
       if(!email || !otp){
         return res.status(400).json({
-        message: "Email and aotp is not provided.",
+        message: "Email and otp is not provided.",
         success: false,
         error: true,
       })
@@ -455,7 +455,7 @@ export async function resetPassword(req,res) {
     })
 
     return res.status(200).json({
-      message:"password updated succesfully",
+      message:"password updated successfully",
       success: true,
       error: false,
     })

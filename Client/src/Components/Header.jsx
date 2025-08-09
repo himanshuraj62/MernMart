@@ -75,8 +75,8 @@
 // };
 
 // export default Header;
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Search from './Search.jsx';
 import MernMart_logo from "../assets/MernMart_logo.png";
 import { FaRegCircleUser } from "react-icons/fa6";
@@ -85,21 +85,40 @@ import { useSelector } from 'react-redux';
 import { GoTriangleDown } from "react-icons/go";
 import { GoTriangleUp } from "react-icons/go";
 import UserMenu from './UserMenu.jsx';
+import { DisplayPriceInRupees } from '../utils/DisplayPriceInRupees.js';
+import { current } from '@reduxjs/toolkit';
+import { useGlobalContext } from '../provider/GlobalProvider.jsx';
+import DisplayCartItem from './DisplayCartItem.jsx';
 
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isSearchPage = location.pathname === "/search"
+  const user = useSelector((state)=> state?.user)
+  const [openUserMenu,setOpenUserMenu] = useState(false)
+  // const [totalPrice,setTotalPrice] = useState(0)
+  const cartItem = useSelector(state => state.cartItem.cart)
+  const {totalQty,totalPrice} = useGlobalContext()
+  const [openCartSection ,setOpenCartSection] = useState(false);
 
-
-  const user = useSelector((state) => state?.user);
- 
-  const [openUserMenu, setopenUserMenu] = useState(false)
   const redirectToLoginPage = () => {
     navigate("/login");
   };
 
   const handleCloseUserMenu = () => {
-    setopenUserMenu(false)
+    setOpenUserMenu(false)
   }
+// useEffect(()=>{
+//   const qty = cartItem.reduce((preve,curr)=>{
+//     return preve + curr.quantity
+//   },0)
+//   setTotalQty(qty);
+//   const tprice = cartItem.reduce((preve,curr)=>{
+//     return preve + curr.productId.price*curr.quantity
+//   },0)
+// setTotalPrice(tprice)
+// },[cartItem])
+
   const handleMobileUser = () => {
     if (!user._id) {
       navigate("/login")
@@ -139,7 +158,7 @@ const Header = () => {
           <div className="hidden lg:flex items-center gap-10 ">
             {user?._id ? (
               <div className='relative'>
-                <div onClick={() => setopenUserMenu(preve => !preve)} className="flex select-none items-center gap-2 cursor-pointer">
+                <div onClick={() => setOpenUserMenu(preve => !preve)} className="flex select-none items-center gap-2 cursor-pointer">
                   <p className="text-base text-gray-800">Account</p>
                   {
                     openUserMenu ? (
@@ -171,19 +190,36 @@ const Header = () => {
               </button>
             )}
 
-            <button className="flex items-center gap-2 bg-green-600 px-4 py-1.5 text-white rounded-md hover:bg-green-800 transition">
+            <button onClick ={()=>setOpenCartSection(true)}className="flex items-center gap-2 bg-green-600 px-4 py-1.5 text-white rounded-md hover:bg-green-800 transition">
               <div className="animate-bounce">
                 <BsCart4 size={30} />
               </div>
 
               <div className="text-sm leading-tight">
-                <p className="font-medium">My Cart</p>
+                <div className='font-semibold text-sm'>
+                                                {
+                                                    cartItem[0] ? (
+                                                        <div>
+                                                          
+                                                            <p>{totalQty} Items</p> 
+                                                            <p>{DisplayPriceInRupees(totalPrice)}</p>
+                                                        </div>
+                                                    ) : (
+                                                        <p>My Cart</p>
+                                                    )
+                                                }
+                                            </div> 
               </div>
             </button>
           </div>
         </div>
 
       </div>
+      {
+       openCartSection && (
+        <DisplayCartItem  close ={()=>setOpenCartSection(false)}/>
+       ) 
+      }
     </header>
   );
 };

@@ -40,12 +40,19 @@ const Search = () => {
     navigate("/search");
   };
 
+  const handleOnChange = (e)=>{
+    const value = e.target.value
+    const url = `/search?q=${value}`
+    navigate(url)
+  }
   return (
     <div className="w-full max-w-3xl mx-auto">
       <div className="group flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm transition-all duration-300 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200">
         <input
           type="text"
+          autoFocus
           placeholder={placeholderText}
+          onChange={handleOnChange}
           className="flex-1 outline-none px-2 text-sm"
         />
 
