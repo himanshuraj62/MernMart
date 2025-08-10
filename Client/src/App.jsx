@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import './App.css'
 import Header from './Components/Header'
 import Footer from './Components/Footer'
@@ -13,6 +13,7 @@ import { setAllCategory, setAllSubCategory, setLoadingCategory } from './store/p
 import CartMobileLink from "./Components/CartMobile"
 import GlobalProvider from './provider/GlobalProvider';
 function App() {
+  const location = useLocation()
   const dispatch = useDispatch();
   const fetchUser = async () => {
     const userData = await fetchUserDetails()
@@ -86,12 +87,16 @@ function App() {
       </main>
       <Footer />
       <Toaster />
-      
-            <CartMobileLink/>
-      
-      </GlobalProvider>
 
-      )
+      {
+        location.pathname !== '/checkout' && (
+          <CartMobileLink />
+        )
+      }
+
+    </GlobalProvider>
+
+  )
 }
 
-      export default App
+export default App

@@ -69,7 +69,7 @@ const CategoryWiseProductDisplay = ({id,name}) => {
             { loading &&
               loadingCardNumber.map((_, index) => {
                             return (
-                                <CardLoading  />
+                                <CardLoading key={`CategorywiseProductDisplayLoading-${index}`} />
                             )
                         })   
             }
